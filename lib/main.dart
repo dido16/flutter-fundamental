@@ -1,84 +1,103 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pml/basic_widgets/image_widget.dart';
-import 'package:pml/basic_widgets/text_widget.dart';
-import 'package:pml/basic_widgets/input_widget.dart';
-import 'package:pml/basic_widgets/date_picker_widget.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const DashboardApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DashboardApp extends StatefulWidget {
+  const DashboardApp({super.key});
+
+  @override
+  State<DashboardApp> createState() => _DashboardAppState();
+}
+
+class _DashboardAppState extends State<DashboardApp> {
+  bool isDark = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.indigo,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      home: DashboardPage(
+        isDark: isDark,
+        onDarkChanged: (value) => setState(() => isDark = value),
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({
+    required this.isDark,
+    required this.onDarkChanged,
+    super.key,
+  });
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  void _showDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Notifikasi'),
-          content: const Text('Ini adalah pop up dialog dari Floating Action Button.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  final bool isDark;
+  final ValueChanged<bool> onDarkChanged;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              
-              const MyTextWidget(),
-              const SizedBox(height: 16),
-
-              const MyImageWidget(),
-              const SizedBox(height: 20),
-
-              const MyInputWidget(),
-              const SizedBox(height: 20),
-
-              const MyDatePickerWidget(),
+      appBar: AppBar(
+        title: const Text('Student Dashboard'),
+        actions: [
+          Row(
+            children: [
+              Icon(isDark ? Icons.dark_mode : Icons.light_mode),
+              const SizedBox(width: 4),
+              CupertinoSwitch(
+                value: isDark,
+                onChanged: onDarkChanged,
+              ),
+              const SizedBox(width: 12),
             ],
           ),
-        ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showDialog,
-        tooltip: 'Show Dialog',
-        child: const Icon(Icons.add),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final columns = constraints.maxWidth >= 700 ? 2 : 1;
+          return GridView.count(
+            padding: const EdgeInsets.all(16),
+            crossAxisCount: columns,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 2.6,
+            children: const [
+              DashboardCard(title: 'Assignments', value: '8'),
+              DashboardCard(title: 'Attendance', value: '92%'),
+              DashboardCard(title: 'Portfolio', value: 'Ready'),
+              DashboardCard(title: 'Current week', value: '02'),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class DashboardCard extends StatelessWidget {
+  const DashboardCard({required this.title, required this.value, super.key});
+
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(children: [
+          Expanded(child: Text(title)),
+          Text(value, style: Theme.of(context).textTheme.headlineSmall),
+        ]),
       ),
     );
   }
