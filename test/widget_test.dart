@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pml/main.dart';
+import 'package:pml/praktikum_6.dart';
 
 void main() {
   testWidgets('Dashboard satu kolom di layar sempit', (tester) async {
