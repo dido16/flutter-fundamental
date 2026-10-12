@@ -3,6 +3,7 @@ import 'package:pml/basic_widgets/image_widget.dart';
 import 'package:pml/basic_widgets/text_widget.dart';
 import 'package:pml/basic_widgets/input_widget.dart';
 import 'package:pml/basic_widgets/date_picker_widget.dart';
+import 'package:pml/pages/google_map_review.dart';
 
 void main() => runApp(const MyApp());
 
@@ -12,11 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Maps Review',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const GoogleMapReviewScreen(),
     );
   }
 }
@@ -36,7 +37,9 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Notifikasi'),
-          content: const Text('Ini adalah pop up dialog dari Floating Action Button.'),
+          content: const Text(
+            'Ini adalah pop up dialog dari Floating Action Button.',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -60,7 +63,6 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              
               const MyTextWidget(),
               const SizedBox(height: 16),
 
