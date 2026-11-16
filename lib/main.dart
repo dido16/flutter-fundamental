@@ -1,8 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:pml/basic_widgets/image_widget.dart';
-import 'package:pml/basic_widgets/text_widget.dart';
-import 'package:pml/basic_widgets/input_widget.dart';
-import 'package:pml/basic_widgets/date_picker_widget.dart';
+
+import './model/pizza.dart';
 
 void main() => runApp(const MyApp());
 
@@ -12,11 +12,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter JSON Demo - Dido',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Dido Fajar Satria'),
     );
   }
 }
@@ -30,55 +30,53 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _showDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Notifikasi'),
-          content: const Text('Ini adalah pop up dialog dari Floating Action Button.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+  List<Pizza> myPizzas = [];
+
+  Future<List<Pizza>> readJsonFile() async {
+    String myString = await DefaultAssetBundle.of(context)
+        .loadString('assets/pizzalist.json');
+    List pizzaMapList = jsonDecode(myString);
+    List<Pizza> myPizzas = [];
+    for (var pizza in pizzaMapList) {
+      Pizza myPizza = Pizza.fromJson(pizza);
+      myPizzas.add(myPizza);
+    }
+
+    String json = convertToJSON(myPizzas);
+    print(json);
+
+    return myPizzas;
+  }
+
+  String convertToJSON(List<Pizza> pizzas) {
+    return jsonEncode(pizzas.map((pizza) => jsonEncode(pizza)).toList());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    readJsonFile().then((value) {
+      setState(() {
+        myPizzas = value;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              
-              const MyTextWidget(),
-              const SizedBox(height: 16),
-
-              const MyImageWidget(),
-              const SizedBox(height: 20),
-
-              const MyInputWidget(),
-              const SizedBox(height: 20),
-
-              const MyDatePickerWidget(),
-            ],
-          ),
-        ),
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showDialog,
-        tooltip: 'Show Dialog',
-        child: const Icon(Icons.add),
+      body: ListView.builder(
+        itemCount: myPizzas.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(myPizzas[index].pizzaName),
+            subtitle: Text(myPizzas[index].description),
+          );
+        },
       ),
     );
   }
