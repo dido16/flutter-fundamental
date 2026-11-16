@@ -1,5 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(const MyApp());
 
@@ -9,11 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter SharedPreferences - Dido',
+      title: 'Flutter File System - Dido',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       ),
-      home: const MyHomePage(title: 'Dido Fajar Satria'),
+      home: const MyHomePage(title: 'File System - Dido'),
     );
   }
 }
@@ -27,47 +29,66 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int appCounter = 0;
+  String documentsPath = '';
+  String tempPath = '';
+  late File myFile;
+  String fileText = '';
 
-  Future<void> readAndWritePreference() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    appCounter = prefs.getInt('appCounter') ?? 0;
-    appCounter++;
-    await prefs.setInt('appCounter', appCounter);
+  Future<void> getPaths() async {
+    final docDir = await getApplicationDocumentsDirectory();
+    final tempDir = await getTemporaryDirectory();
     setState(() {
-      appCounter = appCounter;
+      documentsPath = docDir.path;
+      tempPath = tempDir.path;
     });
   }
 
-  Future<void> deletePreference() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    setState(() {
-      appCounter = 0;
-    });
+  Future<bool> writeFile() async {
+    try {
+      await myFile.writeAsString('Margherita, Capricciosa, Napoli');
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> readFile() async {
+    try {
+      String fileContent = await myFile.readAsString();
+      setState(() {
+        fileText = fileContent;
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    readAndWritePreference();
+    getPaths().then((_) {
+      myFile = File('$documentsPath/pizzas.txt');
+      writeFile();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text('You have opened the app $appCounter times.'),
+            Text('Doc path: $documentsPath'),
+            Text('Temp path: $tempPath'),
             ElevatedButton(
-              onPressed: () {
-                deletePreference();
-              },
-              child: const Text('Reset counter'),
+              child: const Text('Read File'),
+              onPressed: () => readFile(),
             ),
+            Text(fileText),
           ],
         ),
       ),
