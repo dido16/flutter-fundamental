@@ -69,6 +69,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   );
                 },
+                onLongPress: () {
+                  HttpHelper helper = HttpHelper();
+                  int deletedId = snapshot.data![position].id ?? 0;
+                  String deletedName =
+                      snapshot.data![position].pizzaName ?? 'Pizza';
+
+                  helper.deletePizza(deletedId);
+                  setState(() {
+                    snapshot.data!.removeAt(position);
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('$deletedName berhasil dihapus')),
+                  );
+                },
               );
             },
           );
