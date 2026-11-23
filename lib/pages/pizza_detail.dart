@@ -3,7 +3,14 @@ import 'package:pml/httphelper.dart';
 import 'package:pml/model/pizza.dart';
 
 class PizzaDetailScreen extends StatefulWidget {
-  const PizzaDetailScreen({super.key});
+  final Pizza pizza;
+  final bool isNew;
+
+  const PizzaDetailScreen({
+    super.key,
+    required this.pizza,
+    required this.isNew,
+  });
 
   @override
   State<PizzaDetailScreen> createState() => _PizzaDetailScreenState();
@@ -19,6 +26,19 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
   String operationResult = '';
 
   @override
+  void initState() {
+    if (!widget.isNew) {
+      txtId.text = widget.pizza.id.toString();
+      txtName.text = widget.pizza.pizzaName ?? '';
+      txtDescription.text = widget.pizza.description ?? '';
+      txtPrice.text = widget.pizza.price.toString();
+      txtImageUrl.text = widget.pizza.imageUrl ?? '';
+      txtCategory.text = widget.pizza.category ?? '';
+    }
+    super.initState();
+  }
+
+  @override
   void dispose() {
     txtId.dispose();
     txtName.dispose();
@@ -29,7 +49,7 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
     super.dispose();
   }
 
-  Future<void> postPizza() async {
+  Future<void> savePizza() async {
     HttpHelper helper = HttpHelper();
     Pizza pizza = Pizza();
     pizza.id = int.tryParse(txtId.text);
@@ -39,7 +59,9 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
     pizza.imageUrl = txtImageUrl.text;
     pizza.category = txtCategory.text;
 
-    String result = await helper.postPizza(pizza);
+    final result = await (widget.isNew
+        ? helper.postPizza(pizza)
+        : helper.putPizza(pizza));
     setState(() {
       operationResult = result;
     });
@@ -94,7 +116,7 @@ class _PizzaDetailScreenState extends State<PizzaDetailScreen> {
               const SizedBox(height: 48),
               ElevatedButton(
                 onPressed: () {
-                  postPizza();
+                  savePizza();
                 },
                 child: const Text('Send Post'),
               ),
