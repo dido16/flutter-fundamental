@@ -4,14 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:pml/model/pizza.dart';
 
 class HttpHelper {
-  // Pola Singleton (Slide 13)
   static final HttpHelper _httpHelper = HttpHelper._internal();
   HttpHelper._internal();
   factory HttpHelper() {
     return _httpHelper;
   }
 
-  // GANTI dengan domain Mock API WireMock Cloud milikmu (tanpa https://)
   final String authority = 'k7jml1.wiremockapi.cloud';
   final String path = 'pizzalist';
 
@@ -27,4 +25,16 @@ class HttpHelper {
       return [];
     }
   }
+
+  Future<String> postPizza(Pizza pizza) async {
+    const postPath = '/pizza';
+    String post = json.encode(pizza.toJson());
+    Uri url = Uri.https(authority, postPath);
+    http.Response r = await http.post(
+      url,
+      body: post,
+    );
+    return r.body;
+  }
+
 }

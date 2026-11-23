@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pml/httphelper.dart';
 import 'package:pml/model/pizza.dart';
+import 'package:pml/pages/pizza_detail.dart';
 
 void main() => runApp(const MyApp());
 
@@ -55,10 +56,21 @@ class _MyHomePageState extends State<MyHomePage> {
               return ListTile(
                 title: Text(snapshot.data![position].pizzaName ?? ''),
                 subtitle: Text(
-                  '${snapshot.data![position].description} - € ${snapshot.data![position].price}',
+                  '${snapshot.data![position].description} - € ${snapshot.data![position].price} (${snapshot.data![position].category ?? ''})',
                 ),
               );
             },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PizzaDetailScreen(),
+            ),
           );
         },
       ),
