@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pml/httphelper.dart';
+import 'package:pml/model/pizza.dart';
 
 void main() => runApp(const MyApp());
 
@@ -9,11 +10,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter SharedPreferences - Dido',
+      title: 'RESTful API - Dido',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
-      home: const MyHomePage(title: 'Dido Fajar Satria'),
+      home: const MyHomePage(title: 'Pizza List - Dido'),
     );
   }
 }
@@ -27,49 +28,39 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int appCounter = 0;
-
-  Future<void> readAndWritePreference() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    appCounter = prefs.getInt('appCounter') ?? 0;
-    appCounter++;
-    await prefs.setInt('appCounter', appCounter);
-    setState(() {
-      appCounter = appCounter;
-    });
-  }
-
-  Future<void> deletePreference() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    setState(() {
-      appCounter = 0;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    readAndWritePreference();
+  Future<List<Pizza>> callPizzas() async {
+    HttpHelper helper = HttpHelper();
+    return await helper.getPizzaList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Text('You have opened the app $appCounter times.'),
-            ElevatedButton(
-              onPressed: () {
-                deletePreference();
-              },
-              child: const Text('Reset counter'),
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: FutureBuilder<List<Pizza>>(
+        future: callPizzas(),
+        builder: (BuildContext context, AsyncSnapshot<List<Pizza>> snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('Something went wrong'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return ListView.builder(
+            itemCount: (snapshot.data == null) ? 0 : snapshot.data!.length,
+            itemBuilder: (BuildContext context, int position) {
+              return ListTile(
+                title: Text(snapshot.data![position].pizzaName ?? ''),
+                subtitle: Text(
+                  '${snapshot.data![position].description} - € ${snapshot.data![position].price}',
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
